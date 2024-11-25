@@ -1,7 +1,3 @@
-Voici une version mise à jour de votre README, intégrant les nouvelles fonctionnalités ajoutées au code :
-
----
-
 # Referer Spoofer - Chrome Extension
 
 **Referer Spoofer** is a Chrome extension that allows users to set a custom Referer header for their HTTP requests. This tool is particularly useful for developers who need to test referer-based functionalities or simulate traffic sources in web applications.
