@@ -1,0 +1,133 @@
+/* Global Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f9fafb;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #333;
+}
+
+/* Container */
+.container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 300px; 
+    text-align: center;
+}
+
+/* Title */
+h3 {
+    color: #2c3e50;
+    font-size: 22px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Author */
+.author {
+    font-size: 12px;
+    color: #7f8c8d;
+    text-align: center;
+    margin-top: -5px;
+    margin-left: 125px;
+}
+
+.author .github-link {
+    color: #4CAF50;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 12px;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+.author .github-link:hover {
+    color: #388E3C;
+    text-decoration: underline;
+}
+
+/* Input Field */
+input[type="text"] {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border 0.3s ease;
+}
+
+input[type="text"]:focus {
+    border-color: #4CAF50;
+    outline: none;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
+}
+
+/* Buttons */
+button {
+    width: 90%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#setReferer {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#setReferer:hover {
+    background-color: #45a049;
+    transform: scale(1.02);
+}
+
+#deleteReferer {
+    background-color: transparent;
+    color: #4CAF50;
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+    margin: 5px auto;
+}
+
+#deleteReferer:hover {
+    transform: scale(1.01);
+}
+
+.links {
+    margin-top: 0; 
+    display: flex;
+    justify-content: space-around;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.links a {
+    color: #4CAF50;
+    text-decoration: none;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.3s ease;
+}
+
+.links a:hover {
+    color: #388E3C;
+}
+
+.links img {
+    width: 14px;
+    height: 14px;
+}
