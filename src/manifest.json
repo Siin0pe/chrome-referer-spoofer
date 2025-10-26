@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Referer Spoofer",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "description": "Set a custom referer and refresh the page! ",
     "permissions": ["declarativeNetRequest", "declarativeNetRequestFeedback", "activeTab", "storage", "scripting"],
     "host_permissions": ["<all_urls>"],

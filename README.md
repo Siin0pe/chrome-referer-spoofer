@@ -68,7 +68,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Contact
 
-For any questions or support, please reach out on [GitHub](https://github.com/moijesuis2enmoi).
+For any questions or support, please reach out on [GitHub](https://github.com/Siin0pe).
 
 ---
 
