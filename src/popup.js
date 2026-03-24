@@ -21,6 +21,17 @@ function updateDynamicRules(addRules = [], removeRuleIds = []) {
     });
 }
 
+// Restore saved state on popup open
+chrome.storage.local.get(["referer", "externalOnly"], (data) => {
+    if (data.referer) document.getElementById("referer").value = data.referer;
+    document.getElementById("externalOnly").checked = !!data.externalOnly;
+});
+
+// Persist toggle state immediately on change
+document.getElementById("externalOnly").addEventListener("change", (e) => {
+    chrome.storage.local.set({ externalOnly: e.target.checked });
+});
+
 document.getElementById("setReferer").addEventListener("click", () => {
     const referer = document.getElementById("referer").value.trim();
     if (!referer) {
@@ -28,28 +39,40 @@ document.getElementById("setReferer").addEventListener("click", () => {
         return;
     }
 
-    chrome.storage.local.set({ referer }, () => {
-        if (chrome.runtime.lastError) {
-            console.error("Error saving the referer:", chrome.runtime.lastError);
-            return;
+    const externalOnly = document.getElementById("externalOnly").checked;
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        let excludedDomains = [];
+        if (externalOnly) {
+            try {
+                const hostname = new URL(tabs[0]?.url || "").hostname;
+                if (hostname) excludedDomains = [hostname];
+            } catch (_) {}
         }
 
-        const rule = {
-            id: 1,
-            priority: 1,
-            action: {
-                type: "modifyHeaders",
-                requestHeaders: [
-                    { header: "Referer", operation: "set", value: referer }
-                ]
-            },
-            condition: {
-                urlFilter: "*",
-                resourceTypes: ["main_frame"]
+        chrome.storage.local.set({ referer, externalOnly }, () => {
+            if (chrome.runtime.lastError) {
+                console.error("Error saving the referer:", chrome.runtime.lastError);
+                return;
             }
-        };
 
-        updateDynamicRules([rule], [1]);
+            const condition = { urlFilter: "*", resourceTypes: ["main_frame"] };
+            if (excludedDomains.length) condition.excludedRequestDomains = excludedDomains;
+
+            const rule = {
+                id: 1,
+                priority: 1,
+                action: {
+                    type: "modifyHeaders",
+                    requestHeaders: [
+                        { header: "Referer", operation: "set", value: referer }
+                    ]
+                },
+                condition
+            };
+
+            updateDynamicRules([rule], [1]);
+        });
     });
 });
 

@@ -9,23 +9,46 @@
 
 <body>
     <div class="container">
-        <h3>Referer Spoofer</h3>
-        <p class="author">By <a href="https://github.com/Siin0pe" target="_blank" class="github-link">@Siin0pe</a></p>
-        <input type="text" id="referer" placeholder="Enter referer URL" />
-        <button id="setReferer">Set and Refresh</button>
-        <button id="deleteReferer">Delete and Refresh</button>
+        <header>
+            <h1>Referer Spoofer</h1>
+            <a href="https://github.com/Siin0pe" target="_blank" class="author-link">By @Siin0pe</a>
+        </header>
 
-        <div class="links">
+        <div class="field">
+            <label for="referer">Referer URL</label>
+            <input type="text" id="referer" placeholder="https://example.com" />
+        </div>
+
+        <div class="option-row">
+            <span class="option-text">
+                External links only
+                <span class="option-desc">Same-domain links keep their original referer</span>
+            </span>
+            <label class="toggle">
+                <input type="checkbox" id="externalOnly" />
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="actions">
+            <button id="setReferer">Set &amp; Refresh</button>
+            <button id="deleteReferer">Delete</button>
+        </div>
+
+        <footer class="links">
             <a href="https://github.com/Siin0pe/chrome-referer-spoofer" target="_blank">
-                <img src="https://img.icons8.com/ios-filled/50/4CAF50/github.png" alt="GitHub Icon" /> GitHub
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.11.82-.26.82-.58v-2.03c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .1-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.13 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                GitHub
             </a>
             <a href="https://developer.chrome.com/docs/extensions/" target="_blank">
-                <img src="https://img.icons8.com/ios-filled/50/4CAF50/chrome.png" alt="Chrome Docs Icon" /> Chrome Docs
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm0 4.5a7.5 7.5 0 0 1 6.5 3.75H12A3.75 3.75 0 0 0 8.25 12H4.57A7.5 7.5 0 0 1 12 4.5zm0 15a7.5 7.5 0 0 1-6.5-3.75h6.52A3.75 3.75 0 0 0 15.75 12h3.68A7.5 7.5 0 0 1 12 19.5zm0-6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
+                Chrome Docs
             </a>
             <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referer" target="_blank">
-                <img src="https://img.icons8.com/ios-filled/50/4CAF50/info.png" alt="Info Icon" /> Referer Info
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                Info Referer
             </a>
-        </div>
+        </footer>
     </div>
 
     <script src="popup.js"></script>
