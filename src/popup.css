@@ -1,133 +1,246 @@
-/* Global Styles */
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f9fafb;
+:root {
+    --bg:            #0f1117;
+    --surface:       #1a1d27;
+    --border:        #272b3a;
+    --accent:        #22c55e;
+    --accent-hover:  #16a34a;
+    --accent-glow:   rgba(34, 197, 94, 0.15);
+    --text:          #e2e8f0;
+    --text-secondary:#94a3b8;
+    --text-muted:    #4b5563;
+    --danger:        #f87171;
+    --radius:        8px;
+}
+
+* {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    color: #333;
 }
 
-/* Container */
+body {
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    width: 330px;
+}
+
 .container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    width: 300px; 
-    text-align: center;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-/* Title */
-h3 {
-    color: #2c3e50;
-    font-size: 22px;
-    margin-bottom: 5px;
-    font-weight: bold;
+/* ── Header ── */
+header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--text);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-/* Author */
-.author {
-    font-size: 12px;
-    color: #7f8c8d;
-    text-align: center;
-    margin-top: -5px;
-    margin-left: 125px;
-}
-
-.author .github-link {
-    color: #4CAF50;
+.author-link {
+    align-self: flex-end;
+    margin-right: 65px;
+    margin-top: -4px;
+    font-size: 13px;
+    color: var(--text-muted);
     text-decoration: none;
-    font-weight: bold;
-    font-size: 12px;
-    transition: color 0.3s ease, text-decoration 0.3s ease;
+    transition: color 0.2s;
 }
 
-.author .github-link:hover {
-    color: #388E3C;
-    text-decoration: underline;
+.author-link:hover {
+    color: var(--accent);
 }
 
-/* Input Field */
+/* ── Field ── */
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.field label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
 input[type="text"] {
-    width: 90%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 14px;
-    transition: border 0.3s ease;
+    width: 100%;
+    padding: 9px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]::placeholder {
+    color: var(--text-muted);
 }
 
 input[type="text"]:focus {
-    border-color: #4CAF50;
-    outline: none;
-    box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
-/* Buttons */
-button {
-    width: 90%;
-    padding: 10px;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: bold;
+/* ── Option row ── */
+.option-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    gap: 12px;
+}
+
+.option-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.option-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+/* ── Toggle switch ── */
+.toggle {
+    position: relative;
+    flex-shrink: 0;
+    width: 36px;
+    height: 20px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 20px;
+    transition: background-color 0.25s ease;
+}
+
+.slider::before {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    left: 3px;
+    top: 3px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+    transition: transform 0.25s ease, background-color 0.25s ease;
+}
+
+.toggle input:checked + .slider {
+    background: var(--accent);
+}
+
+.toggle input:checked + .slider::before {
+    transform: translateX(16px);
+    background: white;
+}
+
+.toggle input:focus-visible + .slider {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* ── Actions ── */
+.actions {
+    display: flex;
+    gap: 8px;
 }
 
 #setReferer {
-    background-color: #4CAF50;
-    color: white;
+    flex: 1;
+    padding: 9px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
 #setReferer:hover {
-    background-color: #45a049;
-    transform: scale(1.02);
+    background: var(--accent-hover);
+    color: white;
 }
 
 #deleteReferer {
-    background-color: transparent;
-    color: #4CAF50;
-    font-size: 12px;
+    padding: 9px 14px;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
-    text-decoration: underline;
-    margin: 5px auto;
+    transition: color 0.2s, border-color 0.2s;
 }
 
 #deleteReferer:hover {
-    transform: scale(1.01);
+    color: var(--danger);
+    border-color: var(--danger);
 }
 
-.links {
-    margin-top: 0; 
+/* ── Footer ── */
+footer.links {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
     padding-top: 10px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border);
 }
 
 .links a {
-    color: #4CAF50;
+    color: var(--text-muted);
     text-decoration: none;
     font-size: 12px;
     display: flex;
     align-items: center;
     gap: 5px;
-    transition: color 0.3s ease;
+    transition: color 0.2s;
 }
 
 .links a:hover {
-    color: #388E3C;
+    color: var(--accent);
 }
 
-.links img {
-    width: 14px;
-    height: 14px;
+.links svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
 }
