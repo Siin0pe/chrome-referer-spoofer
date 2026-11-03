@@ -1,48 +1,31 @@
-console.log("Service Worker initialized");
+import { loadRules, saveRules, sync } from "./rules.js";
 
-async function cleanupReferer(source) {
-    console.log(`Attempting to remove referer (triggered by: ${source})`);
-    try {
-        await chrome.storage.local.remove("referer");
-        await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: [1] });
-        console.log(`Referer successfully removed (${source})`);
-    } catch (err) {
-        console.error(`Error removing referer (${source}):`, err);
+chrome.action.setBadgeBackgroundColor({ color: "#2B3FBF" });
+
+// v1.3.0 and earlier: one dynamic rule (id 1) plus "referer"/"externalOnly" keys. Turn them into a rule.
+// Runs at every fresh session rather than in onInstalled, which doesn't fire on every update path.
+async function migrateLegacy() {
+    const { referer, externalOnly } = await chrome.storage.local.get(["referer", "externalOnly"]);
+    await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: [1] });
+    if (referer === undefined && externalOnly === undefined) return;
+    if (referer) {
+        const legacy = { id: crypto.randomUUID(), on: true, sites: "", mode: "set", referer, externalOnly: !!externalOnly, allRequests: false };
+        await saveRules([...await loadRules(), legacy]);
     }
+    await chrome.storage.local.remove(["referer", "externalOnly"]);
 }
 
-chrome.runtime.onInstalled.addListener((details) => {
-    console.log("Extension event:", details.reason);
-    cleanupReferer('installation/update');
-});
-
-chrome.runtime.onStartup.addListener(() => {
-    console.log("Browser started.");
-    cleanupReferer('startup');
-});
-
-// Keep excludedRequestDomains in sync with the current page's domain
-chrome.webNavigation.onCommitted.addListener(async (details) => {
-    if (details.frameId !== 0) return;
-
-    const { externalOnly } = await chrome.storage.local.get("externalOnly");
-    if (!externalOnly) return;
-
-    let hostname;
-    try { hostname = new URL(details.url).hostname; } catch (_) { return; }
-    if (!hostname) return;
-
-    const rules = await chrome.declarativeNetRequest.getDynamicRules();
-    const existing = rules.find(r => r.id === 1);
-    if (!existing) return;
-
-    const updated = {
-        ...existing,
-        condition: { ...existing.condition, excludedRequestDomains: [hostname] }
-    };
-
-    await chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: [1],
-        addRules: [updated]
-    });
-}, { url: [{ schemes: ["http", "https"] }] });
+// Session rules (and storage.session) are wiped on browser restart, extension update,
+// reload and disable/enable. The flag tells such a fresh session from a service worker wake-up.
+// ponytail: runtime.onStartup is not used, it does not fire reliably (see v1.2.4).
+async function boot() {
+    const { restored } = await chrome.storage.session.get("restored");
+    if (restored) return;
+    await chrome.storage.session.set({ restored: true });
+    await migrateLegacy().catch(err => console.error("Could not migrate the old referer:", err));
+    const { keepAfterRestart } = await chrome.storage.local.get("keepAfterRestart");
+    const rules = await loadRules();
+    if (!keepAfterRestart && rules.some(r => r.on)) await saveRules(rules.map(r => ({ ...r, on: false })));
+    else await sync();
+}
+boot().catch(err => console.error("Could not restore rules:", err));
