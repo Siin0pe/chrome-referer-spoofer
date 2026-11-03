@@ -48,3 +48,7 @@ The extension does not collect or transmit any user data.
 
 ## Screenshots (1280x800)
 store/1-rules.png, store/2-editor.png, store/3-dark.png
+
+## Promo tiles (JPEG, 24-bit, no alpha)
+- Small promo tile 440x280: store/promo-small.jpg
+- Marquee 1400x560: store/promo-marquee.jpg
