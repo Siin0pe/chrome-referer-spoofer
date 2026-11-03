@@ -1,12 +1,14 @@
 {
     "manifest_version": 3,
     "name": "Referer Spoofer",
-    "version": "1.3.0",
-    "description": "Set a custom referer and refresh the page! ",
-    "permissions": ["declarativeNetRequest", "declarativeNetRequestFeedback", "activeTab", "storage", "scripting", "webNavigation"],
+    "version": "2.0.0",
+    "description": "Change or remove the HTTP Referer header, globally or per site. Set a custom referer for each domain and test referral traffic.",
+    "minimum_chrome_version": "102",
+    "permissions": ["declarativeNetRequest", "storage"],
     "host_permissions": ["<all_urls>"],
     "background": {
-      "service_worker": "background.js"
+      "service_worker": "background.js",
+      "type": "module"
     },
     "action": {
       "default_popup": "popup.html",
