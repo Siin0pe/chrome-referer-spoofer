@@ -1,6 +1,6 @@
 // Run: node test/rules.test.mjs
 import assert from "node:assert/strict";
-import { parseSites, normalizeReferer, toDnr, ruleProblem, restoreSession, simpleRule, setSimple, clearSimple, defaultView } from "../src/rules.js";
+import { parseSites, normalizeReferer, toDnr, ruleProblem, restoreSession, saveRule, simpleRule, setSimple, clearSimple, defaultView } from "../src/rules.js";
 
 assert.deepEqual(parseSites(""), { all: true });
 assert.deepEqual(parseSites("https://Shop.Example.com/, foo.org"), { domains: ["shop.example.com", "foo.org"] });
@@ -150,5 +150,22 @@ assert.equal(defaultView([]), "simple");
 assert.equal(defaultView([allOff]), "simple");
 assert.equal(defaultView([siteRule]), "advanced", "simple mode could not show this rule");
 assert.equal(defaultView([allOn, allOff]), "advanced");
+
+// saveRule: what the rule editor stores
+{
+    const fields = { sites: "b.com", mode: "remove", referer: "", externalOnly: true, allRequests: true };
+    const off = { id: "x", on: false, sites: "a.com", mode: "set", referer: "https://a.com/", externalOnly: false, allRequests: false };
+    const on = { id: "y", on: true, sites: "c.com", mode: "remove", referer: "", externalOnly: false, allRequests: false };
+
+    assert.deepEqual(saveRule([off, on], "x", fields), [{ id: "x", on: false, ...fields }, on], "editing an off rule keeps it off");
+    assert.equal(saveRule([off, on], "y", fields)[1].on, true, "editing an on rule keeps it on");
+    assert.deepEqual(saveRule([on], "gone", fields), [on], "a rule deleted meanwhile does not come back");
+
+    const added = saveRule([on], null, fields);
+    assert.equal(added.length, 2);
+    assert.equal(added[1].on, true, "a new rule starts on");
+    assert.ok(added[1].id);
+    assert.equal(added[1].sites, "b.com");
+}
 
 console.log("rules: ok");

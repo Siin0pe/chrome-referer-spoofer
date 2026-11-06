@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Referer Spoofer",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "description": "Change or remove the HTTP Referer header, globally or per site. Set a custom referer for each domain and test referral traffic.",
     "minimum_chrome_version": "102",
     "permissions": ["declarativeNetRequest", "storage"],
