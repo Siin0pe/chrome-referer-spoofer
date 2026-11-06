@@ -66,6 +66,12 @@ export function ruleProblem(rule) {
     }
 }
 
+// The rule editor: update rule `id` and keep its on/off state, or add a new rule if id is null.
+export function saveRule(rules, id, fields) {
+    if (id) return rules.map(r => r.id === id ? { ...fields, id, on: r.on } : r);
+    return [...rules, { ...fields, id: crypto.randomUUID(), on: true }];
+}
+
 // Simple mode is a view on the rules, not a second kind of rule: it edits the all-sites rule
 // that sends a URL, preferring the one in effect. Advanced mode shows that same rule.
 const isSimple = (r) => !r.sites?.trim() && r.mode === "set";
