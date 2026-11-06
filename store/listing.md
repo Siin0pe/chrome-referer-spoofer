@@ -13,6 +13,11 @@ Developer Tools
 
 Referer Spoofer lets you change the HTTP Referer header Chrome sends, for every site or only for the sites you choose. Set a fake referer, give each domain its own referer, or remove the Referer header completely, then reload the tab and see the result.
 
+Two modes
+• Simple: one referer for all websites, one button
+• Advanced: a full list of rules, one per site or URL pattern
+Both show the same rules, so you can switch at any time.
+
 What you can do
 • Set a custom Referer header for all websites in one click
 • Use a different referer for each website: domains, subdomains or URL patterns such as example.com/shop/*
@@ -47,7 +52,7 @@ Modify or remove the HTTP Referer request header on the sites the user chooses.
 The extension does not collect or transmit any user data.
 
 ## Screenshots (1280x800)
-store/1-rules.png, store/2-editor.png, store/3-dark.png
+store/1-simple.png, store/2-rules.png, store/3-editor.png, store/4-dark.png
 
 ## Promo tiles (JPEG, 24-bit, no alpha)
 - Small promo tile 440x280: store/promo-small.jpg
