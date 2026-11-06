@@ -34,6 +34,7 @@ body {
     color: var(--ink);
     font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
+body.wide { width: 520px; }
 
 button, input { font: inherit; color: inherit; }
 
@@ -59,6 +60,33 @@ h1 { font-size: 15px; font-weight: 650; letter-spacing: -0.01em; }
 .status { color: var(--muted); font-variant-numeric: tabular-nums; }
 
 main { padding: 0 16px 14px; display: grid; gap: 10px; }
+.panel { display: grid; gap: 10px; min-width: 0; }
+#simple { gap: 12px; }
+
+/* Mode switch */
+.tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin: 0 16px 12px;
+    padding: 2px;
+    background: var(--line);
+    border-radius: 8px;
+}
+.tab {
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    padding: 4px 12px;
+    color: var(--muted);
+    font-weight: 550;
+}
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] {
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+}
 
 /* Rules: one panel, each row reads as the header line it produces */
 .rules {
@@ -71,10 +99,10 @@ main { padding: 0 16px 14px; display: grid; gap: 10px; }
 
 .rule {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto 1fr auto; /* actions sit beside the rule, which keeps long lists short */
     gap: 2px 12px;
     align-items: start;
-    padding: 10px 12px 8px;
+    padding: 10px 12px;
 }
 .rule + .rule { border-top: 1px solid var(--line); }
 .rule.off .rule-body { opacity: 0.55; }
@@ -91,8 +119,9 @@ main { padding: 0 16px 14px; display: grid; gap: 10px; }
 .key { color: var(--signal); }
 .rule.off .key { color: var(--muted); }
 .flags { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.problem { margin-top: 2px; }
 
-.rule-actions { grid-column: 2; display: flex; gap: 14px; margin-top: 4px; }
+.rule-actions { display: flex; gap: 14px; }
 .rule-actions button {
     border: 0;
     background: none;
