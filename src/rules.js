@@ -56,6 +56,40 @@ export function toDnr(rule, index, all) {
     return { id: index + 1, priority, action: { type: "modifyHeaders", requestHeaders: [header] }, condition };
 }
 
+// Why Chrome can't apply this rule, or null if it can.
+export function ruleProblem(rule) {
+    try {
+        toDnr(rule, 0, [rule]);
+        return null;
+    } catch (err) {
+        return err.message;
+    }
+}
+
+// Simple mode is a view on the rules, not a second kind of rule: it edits the all-sites rule
+// that sends a URL, preferring the one in effect. Advanced mode shows that same rule.
+const isSimple = (r) => !r.sites?.trim() && r.mode === "set";
+
+export function simpleRule(rules) {
+    return rules.find(r => isSimple(r) && r.on) ?? rules.find(isSimple) ?? null;
+}
+
+export function setSimple(rules, { referer, externalOnly }) {
+    const current = simpleRule(rules);
+    if (current) return rules.map(r => r === current ? { ...r, on: true, referer, externalOnly } : r);
+    return [...rules, { id: crypto.randomUUID(), on: true, sites: "", mode: "set", referer, externalOnly, allRequests: false }];
+}
+
+export function clearSimple(rules) {
+    const current = simpleRule(rules);
+    return rules.filter(r => r !== current);
+}
+
+// Without a saved choice, open the mode that can show every rule.
+export function defaultView(rules) {
+    return rules.every(r => r === simpleRule(rules)) ? "simple" : "advanced";
+}
+
 export async function loadRules() {
     const { rules = [] } = await chrome.storage.local.get("rules");
     return rules;
@@ -82,3 +116,34 @@ export const saveRules = (rules) => locked(async () => {
 });
 
 export const sync = () => locked(async () => apply(await loadRules()));
+
+// v1.3.0 and earlier: one dynamic rule (id 1) plus "referer"/"externalOnly" keys. Turn them into a rule.
+async function migrateLegacy() {
+    const { referer, externalOnly } = await chrome.storage.local.get(["referer", "externalOnly"]);
+    await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: [1] });
+    if (referer === undefined && externalOnly === undefined) return;
+    if (referer) {
+        const legacy = { id: crypto.randomUUID(), on: true, sites: "", mode: "set", referer, externalOnly: !!externalOnly, allRequests: false };
+        await saveRules([...await loadRules(), legacy]);
+    }
+    await chrome.storage.local.remove(["referer", "externalOnly"]);
+}
+
+// First call of a browser session: migrate, then apply the "off after restart" setting.
+// Session rules (and storage.session) are wiped on browser restart, extension update,
+// reload and disable/enable. The flag tells such a fresh session from a later call.
+// Worker and popup both call this; the lock makes the popup wait for a restore in progress.
+export const restoreSession = () => navigator.locks.request("restore", async () => {
+    const { restored } = await chrome.storage.session.get("restored");
+    if (restored) return;
+    try {
+        await migrateLegacy().catch(err => console.error("Could not migrate the old referer:", err));
+        const { keepAfterRestart } = await chrome.storage.local.get("keepAfterRestart");
+        const rules = await loadRules();
+        if (!keepAfterRestart && rules.some(r => r.on)) await saveRules(rules.map(r => ({ ...r, on: false })));
+        else await sync();
+    } finally {
+        // Also after a failure, or every later call would switch off rules the user has since turned on.
+        await chrome.storage.session.set({ restored: true });
+    }
+});

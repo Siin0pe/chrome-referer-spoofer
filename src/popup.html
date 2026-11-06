@@ -13,14 +13,43 @@
         <p id="status" class="status" aria-live="polite"></p>
     </header>
 
+    <div class="tabs" role="tablist" aria-label="Mode">
+        <button id="tabSimple" class="tab" type="button" role="tab" aria-controls="simple">Simple</button>
+        <button id="tabAdvanced" class="tab" type="button" role="tab" aria-controls="advanced">Advanced</button>
+    </div>
+
     <main>
+        <p id="error" class="error" role="alert" hidden></p>
+
+        <form id="simple" class="panel" role="tabpanel" aria-labelledby="tabSimple" hidden novalidate>
+            <div class="field">
+                <label for="simpleReferer">Referer for all sites</label>
+                <input id="simpleReferer" type="url" placeholder="https://www.google.com/" autocomplete="off" spellcheck="false">
+            </div>
+
+            <label class="check">
+                <input id="simpleExternalOnly" type="checkbox">
+                <span>Only on links from another site
+                    <small>Links within the same site keep their real referer.</small>
+                </span>
+            </label>
+
+            <p id="simpleError" class="error" role="alert" hidden></p>
+
+            <div class="actions">
+                <button class="primary" type="submit">Set and reload tab</button>
+                <button id="simpleDelete" type="button">Delete</button>
+            </div>
+
+            <p id="simpleNote" class="hint" hidden></p>
+        </form>
+
+        <div id="advanced" class="panel" role="tabpanel" aria-labelledby="tabAdvanced" hidden>
         <ul id="rules" class="rules"></ul>
 
         <p id="empty" class="empty" hidden>
             No rules yet. Add one to send a custom Referer header to every site, or only to the sites you pick.
         </p>
-
-        <p id="error" class="error" role="alert" hidden></p>
 
         <button id="add" class="add" type="button">Add rule</button>
 
@@ -66,6 +95,7 @@
                 <button id="cancel" type="button">Cancel</button>
             </div>
         </form>
+        </div>
     </main>
 
     <footer class="bottom">
@@ -86,6 +116,7 @@
                 <p class="target"></p>
                 <p class="header"><span class="key">Referer:</span> <span class="value"></span></p>
                 <p class="flags"></p>
+                <p class="problem error" hidden></p>
             </div>
             <div class="rule-actions">
                 <button type="button" class="edit">Edit</button>
