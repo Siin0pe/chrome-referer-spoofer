@@ -1,4 +1,4 @@
-import { loadRules, saveRules, sync, restoreSession, ruleProblem, simpleRule, setSimple, clearSimple, defaultView, parseSites, normalizeReferer } from "./rules.js";
+import { loadRules, saveRules, sync, restoreSession, ruleProblem, saveRule, simpleRule, setSimple, clearSimple, defaultView, parseSites, normalizeReferer } from "./rules.js";
 
 const $ = (id) => document.getElementById(id);
 const form = $("editor");
@@ -51,7 +51,10 @@ function render() {
         li.querySelector(".edit").setAttribute("aria-label", `Edit rule for ${target}`);
         li.querySelector(".delete").setAttribute("aria-label", `Delete rule for ${target}`);
         li.querySelector(".edit").addEventListener("click", () => openEditor(rule.id));
-        li.querySelector(".delete").addEventListener("click", () => commit(list => list.filter(r => r.id !== rule.id)));
+        li.querySelector(".delete").addEventListener("click", () => {
+            if (editing === rule.id) closeEditor();
+            commit(list => list.filter(r => r.id !== rule.id));
+        });
         list.append(li);
     });
 
@@ -159,9 +162,8 @@ function closeEditor() {
 
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const rule = {
-        id: editing ?? crypto.randomUUID(),
-        on: true,
+    const id = editing;
+    const fields = {
         sites: $("sites").value.trim(),
         mode: form.mode.value,
         referer: $("referer").value.trim(),
@@ -169,13 +171,13 @@ form.addEventListener("submit", async (e) => {
         allRequests: $("allRequests").checked
     };
     try {
-        parseSites(rule.sites);
-        if (rule.mode === "set") rule.referer = normalizeReferer(rule.referer);
+        parseSites(fields.sites);
+        if (fields.mode === "set") fields.referer = normalizeReferer(fields.referer);
     } catch (err) {
         showError("formError", err.message);
         return;
     }
-    const ok = await commit(list => list.some(r => r.id === rule.id) ? list.map(r => r.id === rule.id ? rule : r) : [...list, rule]);
+    const ok = await commit(list => saveRule(list, id, fields));
     if (ok) closeEditor();
 });
 
