@@ -1,10 +1,11 @@
-import { loadRules, saveRules, parseSites, normalizeReferer } from "./rules.js";
+import { loadRules, saveRules, sync, restoreSession, ruleProblem, simpleRule, setSimple, clearSimple, defaultView, parseSites, normalizeReferer } from "./rules.js";
 
 const $ = (id) => document.getElementById(id);
 const form = $("editor");
 let rules = [];
 let editing = null; // id of the rule being edited, null = new rule
 let queue = Promise.resolve();
+let view = "simple";
 
 async function activeTab() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -17,7 +18,8 @@ async function reloadTab() {
 }
 
 function describeSites(sites) {
-    const s = parseSites(sites);
+    let s;
+    try { s = parseSites(sites); } catch (_) { return sites; } // ruleProblem explains it
     if (s.all) return "All sites";
     if (s.urlFilter) return `URLs matching ${s.urlFilter}`;
     return s.domains.join(", ");
@@ -35,6 +37,9 @@ function render() {
         const flags = [rule.externalOnly && "links from other sites only", rule.allRequests && "all requests"].filter(Boolean);
         li.querySelector(".flags").textContent = flags.join(", ");
         li.querySelector(".flags").hidden = !flags.length;
+        const problem = ruleProblem(rule);
+        li.querySelector(".problem").textContent = problem && `Not applied: ${problem}`;
+        li.querySelector(".problem").hidden = !problem;
 
         const toggle = li.querySelector(".on");
         toggle.checked = rule.on;
@@ -50,9 +55,53 @@ function render() {
         list.append(li);
     });
 
-    const on = rules.filter(r => r.on).length;
+    const on = rules.filter(r => r.on && !ruleProblem(r)).length; // same count as the badge
     $("empty").hidden = rules.length > 0;
-    $("status").textContent = rules.length ? `${on} of ${rules.length} on` : "";
+    renderSimple(on);
+    $("status").textContent = view === "simple"
+        ? (isSimpleOn() ? "On" : "Off")
+        : (rules.length ? `${on} of ${rules.length} on` : "");
+}
+
+const isSimpleOn = () => {
+    const rule = simpleRule(rules);
+    return !!rule?.on && !ruleProblem(rule);
+};
+
+function renderSimple(on) {
+    const rule = simpleRule(rules);
+    $("simpleReferer").value = rule?.referer ?? "";
+    $("simpleExternalOnly").checked = !!rule?.externalOnly;
+    $("simpleDelete").hidden = !rule;
+    const problem = rule && ruleProblem(rule);
+    $("simpleError").textContent = problem ? `Not applied: ${problem}` : "";
+    $("simpleError").hidden = !problem;
+
+    const others = on - (isSimpleOn() ? 1 : 0);
+    $("simpleNote").textContent = others === 1
+        ? "1 other rule from Advanced is also on."
+        : `${others} other rules from Advanced are also on.`;
+    $("simpleNote").hidden = others === 0;
+}
+
+function showView(next) {
+    view = next;
+    const simple = view === "simple";
+    document.body.classList.toggle("wide", !simple);
+    $("simple").hidden = !simple;
+    $("advanced").hidden = simple;
+    for (const [id, selected] of [["tabSimple", simple], ["tabAdvanced", !simple]]) {
+        $(id).setAttribute("aria-selected", selected);
+        $(id).tabIndex = selected ? 0 : -1;
+    }
+    closeEditor(); // its errors would land in a hidden panel
+    $("error").hidden = true;
+    render();
+}
+
+function chooseView(next) {
+    showView(next);
+    chrome.storage.local.set({ view: next });
 }
 
 // Changes run one after another, each on top of the previous result.
@@ -132,6 +181,29 @@ form.addEventListener("submit", async (e) => {
 
 form.addEventListener("change", (e) => { if (e.target.name === "mode") syncModeUI(); });
 $("add").addEventListener("click", () => openEditor(null));
+
+$("tabSimple").addEventListener("click", () => chooseView("simple"));
+$("tabAdvanced").addEventListener("click", () => chooseView("advanced"));
+document.querySelector(".tabs").addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    const next = view === "simple" ? "advanced" : "simple";
+    chooseView(next);
+    $(next === "simple" ? "tabSimple" : "tabAdvanced").focus();
+});
+
+$("simple").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    let referer;
+    try {
+        referer = normalizeReferer($("simpleReferer").value);
+    } catch (err) {
+        showError("simpleError", err.message);
+        return;
+    }
+    const externalOnly = $("simpleExternalOnly").checked;
+    await commit(list => setSimple(list, { referer, externalOnly }));
+});
+$("simpleDelete").addEventListener("click", () => commit(clearSimple));
 $("cancel").addEventListener("click", closeEditor);
 form.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.preventDefault(); closeEditor(); } });
 
@@ -147,7 +219,14 @@ $("keepAfterRestart").addEventListener("change", (e) => {
     chrome.storage.local.set({ keepAfterRestart: e.target.checked });
 });
 
+// Don't rely on the worker having run: it may still be restoring, or not have woken up at all.
+try {
+    await restoreSession();
+    await sync();
+} catch (err) {
+    showError("error", `Chrome rejected the rules: ${err.message}`);
+}
 rules = await loadRules();
-const { keepAfterRestart } = await chrome.storage.local.get("keepAfterRestart");
+const { keepAfterRestart, view: savedView } = await chrome.storage.local.get(["keepAfterRestart", "view"]);
 $("keepAfterRestart").checked = !!keepAfterRestart;
-render();
+showView(savedView ?? defaultView(rules));
